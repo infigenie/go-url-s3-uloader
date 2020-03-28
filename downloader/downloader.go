@@ -5,12 +5,16 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/gocarina/gocsv"
 )
 
 // ProcessCsvFile to process the csv
-func ProcessCsvFile(ctx context.Context, fileName string) error {
+func ProcessCsvFile(ctx context.Context, wg *sync.WaitGroup, fileName string) error {
+
+	defer wg.Done()
+
 	urlsFile, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		panic(err)
@@ -41,7 +45,7 @@ func ProcessCsvFile(ctx context.Context, fileName string) error {
 	}
 	fmt.Println(len(urls))
 	DownloadAndSaveURLs(ctx, fileName, urls)
-
+	fmt.Println(Red, "All Urls saved for: ", fileName)
 	return nil
 }
 

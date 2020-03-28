@@ -5,24 +5,20 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
+	"sync"
 
 	"github.com/infigenie/go-url-s3-uloader/downloader"
 )
-
-var Reset = "\033[0m"
-var Red = "\033[31m"
-var Green = "\033[32m"
-var Yellow = "\033[33m"
-var Blue = "\033[34m"
-var Purple = "\033[35m"
-var Cyan = "\033[36m"
-var Gray = "\033[37m"
-var White = "\033[97m"
 
 // const WORKER_COUNT = 10
 // const JOB_COUNT = 10
 
 func main() {
+	runtime.GOMAXPROCS(1)
+
+	var wg sync.WaitGroup
+
 	log.Println("starting application...")
 	var files []string
 
@@ -34,9 +30,12 @@ func main() {
 	fmt.Println(files)
 	for _, file := range files {
 		fmt.Println("Processing file: " + file)
+		wg.Add(1)
 		// call the csv processing
-		downloader.ProcessCsvFile(nil, file)
+		go downloader.ProcessCsvFile(nil, &wg, file)
 	}
+	wg.Wait()
+	fmt.Println(downloader.Gray, "Kudos...!! All Processing done.")
 
 }
 
